@@ -1,6 +1,6 @@
 
-window.jQuery = jQuery || {};
-window.jBus = jBus || {};
+window.jQuery = window.jQuery || {};
+window.jBus = window.jBus || {};
 
 
 (function ($, class_bus) {
