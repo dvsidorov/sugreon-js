@@ -92,7 +92,12 @@ window.jBus = window.jBus || {};
         };
 
 
-
+        /**
+         * Method for clean selector text, if he has
+         * some word in list of excluded.
+         * @param selector_text
+         * @returns {*}
+         */
         this.cleanSelector = function (selector_text) {
 
             if (!selector_text) { return selector_text };
