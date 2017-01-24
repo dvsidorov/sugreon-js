@@ -52,8 +52,11 @@ window.jBus = window.jBus || {};
          * for target DOM element
          * @param target
          * @param storage
+         * @param media
          */
-        this.getCssInfo = function (target, storage) {
+        this.getCssInfo = function (target, storage, media) {
+
+            this.media = media;
 
             var html_target = $(target)[0];
 
@@ -68,6 +71,7 @@ window.jBus = window.jBus || {};
          * @returns {Stylesheet[]}
          */
         this.getStyleSheets = function () {
+
             return document.styleSheets;
         };
 
@@ -130,27 +134,119 @@ window.jBus = window.jBus || {};
          * @returns {boolean}
          */
         this.getRules = function (sheets, html_target, storage) {
-
             var obj = this;
             $.each(sheets, function (index, sheet) {
-                $.each (sheet.rules, function (index, item) {
-
-                    var selector_text = item.selectorText;
-                    selector_text = obj.cleanSelector(selector_text);
-
-                    var element_s = $(selector_text);
-
-                    if (obj.elementConsist(element_s, html_target)) {
-                        storage.push({
-                            'href': sheet.href,
-                            'cssText': item.cssText
-                        })
-                    }
-                });
+                if (sheet.type == 'text/css') {
+                    obj.styleSheetAnalyze(sheet, html_target, storage)
+                }
             });
             return true;
-
         };
+
+        /**
+         * Method for GET all rules
+         * for HTML Target element
+         * on StyleSheet
+         * @param sheet
+         * @param html_target
+         * @param storage
+         * @returns {boolean}
+         */
+        this.styleSheetAnalyze = function (sheet, html_target, storage) {
+            var obj = this;
+            $.each (sheet.rules, function (index, rule) {
+                obj.ruleAnalyze(rule, html_target, storage)
+            });
+        };
+
+        /**
+         * Method for GET all rules
+         * for HTML Target element
+         * on StyleSheet Rule
+         * @param rule
+         * @param html_target
+         * @param storage
+         * @returns {boolean}
+         */
+        this.styleRuleAnalyze = function (rule, html_target, storage) {
+            var selector_text = rule.selectorText;
+            selector_text = this.cleanSelector(selector_text);
+
+            var element_s = $(selector_text);
+
+            var media = null;
+            if (rule.parentRule) {
+                media = rule.parentRule.media
+            }
+
+            if (this.media && !media) {
+                return false
+            }
+
+            if (this.elementConsist(element_s, html_target)) {
+                storage.push({
+                    'href': rule.parentStyleSheet.href,
+                    'cssText': rule.cssText,
+                    'media': media
+                })
+            }
+        };
+
+        /**
+         * Method for GET all rules
+         * for HTML Target element
+         * on Import Rule
+         * @param rule
+         * @param html_target
+         * @param storage
+         * @returns {boolean}
+         */
+        this.importRuleAnalyze = function (rule, html_target, storage) {
+
+            var obj = this;
+            $.each (rule.styleSheet.rules, function (index, rule) {
+                obj.ruleAnalyze(rule, html_target, storage)
+            });
+        };
+
+        /**
+         * Method for GET all rules
+         * for HTML Target element
+         * on Media Rule
+         * @param rule
+         * @param html_target
+         * @param storage
+         * @returns {boolean}
+         */
+        this.mediaRuleAnalyze = function (rule, html_target, storage) {
+
+            var obj = this;
+            $.each (rule.cssRules, function (index, rule) {
+                obj.ruleAnalyze(rule, html_target, storage)
+            });
+        };
+
+        /**
+         * Method for GET all rules
+         * for HTML Target element
+         * @param rule
+         * @param html_target
+         * @param storage
+         * @returns {boolean}
+         */
+        this.ruleAnalyze = function (rule, html_target, storage) {
+
+            if (rule.type == 1) {
+                this.styleRuleAnalyze(rule, html_target, storage)
+            }
+            if (rule.type == 3) {
+                this.importRuleAnalyze(rule, html_target, storage)
+            }
+            if (rule.type == 4) {
+                this.mediaRuleAnalyze(rule, html_target, storage)
+            }
+        };
+
     };
 
 }) (jQuery, jBus);
