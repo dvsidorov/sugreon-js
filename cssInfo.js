@@ -53,9 +53,11 @@ window.jBus = window.jBus || {};
          * @param target
          * @param storage
          * @param media
+         * @param clean
          */
-        this.getCssInfo = function (target, storage, media) {
+        this.getCssInfo = function (target, storage, media, clean) {
 
+            this.clean = clean;
             this.media = media;
 
             var html_target = $(target)[0];
@@ -104,8 +106,9 @@ window.jBus = window.jBus || {};
          */
         this.cleanSelector = function (selector_text) {
 
-            if (!selector_text) { return selector_text };
+            if (!selector_text) { return selector_text }
 
+            var present = false;
             var obj = this;
             var search_elements = [];
             $.each([].concat(obj.pseudo_elements).concat(obj.pseudo_classes),
@@ -120,8 +123,13 @@ window.jBus = window.jBus || {};
 
                 if (selector_text.match(regexp)) {
                     selector_text = selector_text.replace(ps_element, '');
+                    present = true;
                 }
             });
+
+            if (!present){
+                return null;
+            }
             return selector_text;
         };
 
@@ -170,8 +178,14 @@ window.jBus = window.jBus || {};
          */
         this.styleRuleAnalyze = function (rule, html_target, storage) {
             var selector_text = rule.selectorText;
-            selector_text = this.cleanSelector(selector_text);
 
+            if (this.clean) {
+                selector_text = this.cleanSelector(selector_text);
+            }
+
+            if (!selector_text) {
+                return false;
+            }
             var element_s = $(selector_text);
 
             var media = null;
@@ -179,7 +193,8 @@ window.jBus = window.jBus || {};
                 media = rule.parentRule.media
             }
 
-            if (this.media && !media) {
+            if ((this.media && !media) ||
+                (!this.media && media)) {
                 return false
             }
 
