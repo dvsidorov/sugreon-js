@@ -52,13 +52,15 @@ window.jBus = window.jBus || {};
          * for target DOM element
          * @param target
          * @param storage
+         * @param extra
          * @param media
          * @param clean
          */
-        this.getCssInfo = function (target, storage, media, clean) {
+        this.getCssInfo = function (target, storage, extra, media, clean) {
 
             this.clean = clean;
             this.media = media;
+            this.extra = extra;
 
             var html_target = $(target)[0];
 
@@ -118,6 +120,7 @@ window.jBus = window.jBus || {};
                 }
             );
             search_elements = search_elements.concat(this.plugin_action_classes);
+            search_elements = search_elements.concat(this.extra);
             $.each(search_elements, function (index, ps_element) {
                 var regexp = new RegExp('\\w+'+ps_element, 'gi');
 
