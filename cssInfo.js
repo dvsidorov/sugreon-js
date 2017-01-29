@@ -52,17 +52,18 @@ window.jBus = window.jBus || {};
          * for target DOM element
          * @param target
          * @param storage
+         * @param exclude
          * @param extra
          * @param media
          * @param clean
          */
-        this.getCssInfo = function (target, storage, extra, media, clean) {
+        this.getCssInfo = function (target, storage, exclude, extra, media, clean) {
 
             this.clean = clean;
             this.media = media;
             this.extra = extra;
 
-            var html_target = $(target)[0];
+            var html_target = $(target).not(exclude.join())[0];
 
             var sheets = this.getStyleSheets ();
             this.getRules(sheets, html_target, storage);
